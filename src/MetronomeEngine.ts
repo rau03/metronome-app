@@ -1,5 +1,3 @@
-// src/MetronomeEngine.ts
-
 export class MetronomeEngine {
   private audioContext: AudioContext | null = null;
   private isPlaying: boolean = false;
@@ -7,6 +5,10 @@ export class MetronomeEngine {
   private currentBeat: number = 0;
   private beatsPerMeasure: number = 4;
 
+  // Scheduling Variables
+  // We use a "Lookahead" technique: A setInterval runs frequently (25ms)
+  // to schedule Web Audio events slightly in the future (0.1s).
+  // This prevents timing drift caused by the main thread.
   private lookahead: number = 25.0; // ms
   private scheduleAheadTime: number = 0.1; // sec
   private nextNoteTime: number = 0.0;
@@ -25,6 +27,7 @@ export class MetronomeEngine {
         (window as any).webkitAudioContext)();
     }
 
+    // Modern browsers require resuming AudioContext after a user gesture
     if (this.audioContext.state === "suspended") {
       this.audioContext.resume();
     }
@@ -32,7 +35,6 @@ export class MetronomeEngine {
     this.isPlaying = true;
     this.currentBeat = 0;
 
-    // Use ! to tell TypeScript we know audioContext exists now
     this.nextNoteTime = this.audioContext!.currentTime;
 
     this.scheduler();
@@ -55,11 +57,11 @@ export class MetronomeEngine {
     this.currentBeat = 0;
   }
 
-  // --- PRIVATE METHODS ---
-
   private scheduler() {
     if (this.audioContext == null) return;
 
+    // While there are notes that will need to play before the next interval,
+    // schedule them and advance the pointer.
     while (
       this.nextNoteTime <
       this.audioContext.currentTime + this.scheduleAheadTime
@@ -82,8 +84,9 @@ export class MetronomeEngine {
     osc.connect(envelope);
     envelope.connect(this.audioContext.destination);
 
+    // Synthesize a "Woodblock" sound
+    // Sine wave + sharp decay = percussive tone
     osc.type = "sine";
-
     if (beatNumber === 0) {
       osc.frequency.value = 1200; // High pitch for beat 1
     } else {

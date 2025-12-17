@@ -3,16 +3,12 @@ import { MetronomeEngine } from "./MetronomeEngine";
 import "./App.css";
 
 function App() {
+  // Use a Ref to persist the engine instance across renders without triggering re-renders
   const metronomeRef = useRef<MetronomeEngine>(new MetronomeEngine(120, 4));
-
-  // React State (For the UI display)
   const [isPlaying, setIsPlaying] = useState(false);
   const [bpm, setBpm] = useState(120);
   const [beatsPerMeasure, setBeatsPerMeasure] = useState(4);
 
-  // --- HANDLERS ---
-  // If playing > Stop the engine, update UI to show "START"
-  // If stopped > Start the engine, update UI to show "STOP"
   const handleStartStop = () => {
     if (isPlaying) {
       metronomeRef.current.stop();
@@ -23,18 +19,12 @@ function App() {
     }
   };
 
-  // e.target.value is the slider value. parseInt converts it to a number.
-  // setBpm(newBpm) updates the React > UI re-renders with new label.
-  // setTempo(newBpm) updates the engine > audio timing changes.
   const handleBpmChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newBpm = parseInt(e.target.value);
     setBpm(newBpm);
     metronomeRef.current.setTempo(newBpm);
   };
 
-  // e.target.value is the selected option value. parseInt converts it to a number.
-  // setBeatsPerMeasure updates the React > dropdown stays selected on "3/4"
-  // setTimeSignature updates engine > beat counter now cycles through 0, 1, 2, 3, 0, etc.
   const handleTimeSigChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newBeats = parseInt(e.target.value);
     setBeatsPerMeasure(newBeats);
