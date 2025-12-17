@@ -82,10 +82,10 @@ export class MetronomeEngine {
     osc.connect(envelope);
     envelope.connect(this.audioContext.destination);
 
-    osc.type = "square";
+    osc.type = "sine";
 
     if (beatNumber === 0) {
-      osc.frequency.value = 1000; // High pitch for beat 1
+      osc.frequency.value = 1200; // High pitch for beat 1
     } else {
       osc.frequency.value = 800; // Low pitch for others
     }
