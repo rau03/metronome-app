@@ -2,7 +2,7 @@
 
 A precise, web-based metronome application built with **React**, **TypeScript**, and the **Web Audio API**.
 
-## 🚀 Quick Start
+## Quick Start
 
 To run the project locally, follow these steps:
 
@@ -19,7 +19,7 @@ To run the project locally, follow these steps:
 3.  **Open the Application:**
     Open your browser and navigate to the link provided in the terminal (usually `http://localhost:5173`).
 
-## 🧠 Technical Approach
+## Technical Approach
 
 ### The Core Challenge: Timing Accuracy
 The most critical requirement for a metronome is precision. Standard JavaScript timers (`setInterval` or `setTimeout`) run on the main thread and are subject to drift, especially when the UI is re-rendering or the browser is under load.
@@ -34,7 +34,7 @@ I implemented the industry-standard "Lookahead" scheduling technique (often refe
 *   **`MetronomeEngine.ts`:** A dedicated TypeScript class that encapsulates all audio logic, state, and scheduling. This ensures separation of concerns—the UI does not know how sound is generated, it only sends commands.
 *   **`App.tsx`:** A React component that handles user interaction and state. It maintains a persistent instance of the engine using `useRef` to survive re-renders.
 
-## 🛠 Design Decisions & Trade-offs
+## Design Decisions & Trade-offs
 
 ### 1. Synthesized Sound vs. Sampled Audio
 **Decision:** I chose to synthesize the sound using an Oscillator (Sine wave) with a custom Gain Envelope rather than loading an `.mp3` or `.wav` sample.
@@ -49,7 +49,7 @@ I implemented the industry-standard "Lookahead" scheduling technique (often refe
 **Decision:** Used Vite for the build tool.
 *   **Reasoning:** It provides a significantly faster development experience and optimized production build compared to Create React App, with first-class TypeScript support out of the box.
 
-## 🔮 Future Improvements
+## Future Improvements
 
 If I were to expand this project further, I would implement the following features:
 
@@ -63,7 +63,7 @@ If I were to expand this project further, I would implement the following featur
 3.  **Tap Tempo:**
     *   A button allowing users to tap a rhythm to automatically set the BPM.
 
-## 📂 Project Structure
+## Project Structure
 
 ```text
 src/
