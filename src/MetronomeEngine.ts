@@ -76,12 +76,13 @@ export class MetronomeEngine {
   private scheduleNote(beatNumber: number, time: number) {
     if (!this.audioContext) return;
 
-    // Create Oscillator and GainNode
     const osc = this.audioContext.createOscillator();
     const envelope = this.audioContext.createGain();
 
     osc.connect(envelope);
     envelope.connect(this.audioContext.destination);
+
+    osc.type = "square";
 
     if (beatNumber === 0) {
       osc.frequency.value = 1000; // High pitch for beat 1
@@ -90,10 +91,10 @@ export class MetronomeEngine {
     }
 
     osc.start(time);
-    osc.stop(time + 0.05);
+    osc.stop(time + 0.1);
 
-    envelope.gain.value = 1;
-    envelope.gain.exponentialRampToValueAtTime(0.001, time + 0.05);
+    envelope.gain.setValueAtTime(1, time);
+    envelope.gain.exponentialRampToValueAtTime(0.001, time + 0.1);
   }
 
   private nextNote() {
