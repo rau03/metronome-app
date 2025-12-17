@@ -1,20 +1,18 @@
 import { useState, useRef } from "react";
 import { MetronomeEngine } from "./MetronomeEngine";
-import "./App.css"; // We will style this later
+import "./App.css";
 
 function App() {
-  // 1. Store the engine in a ref so it persists between renders
-  // We initialize it ONCE.
   const metronomeRef = useRef<MetronomeEngine>(new MetronomeEngine(120, 4));
 
-  // 2. React State (For the UI display)
+  // React State (For the UI display)
   const [isPlaying, setIsPlaying] = useState(false);
   const [bpm, setBpm] = useState(120);
   const [beatsPerMeasure, setBeatsPerMeasure] = useState(4);
 
   // --- HANDLERS ---
-  //If playing > Stop the engine, update UI to show "START"
-  //If stopped > Start the engine, update UI to show "STOP"
+  // If playing > Stop the engine, update UI to show "START"
+  // If stopped > Start the engine, update UI to show "STOP"
   const handleStartStop = () => {
     if (isPlaying) {
       metronomeRef.current.stop();
@@ -25,23 +23,22 @@ function App() {
     }
   };
 
-    //e.target.value is the slider value. parseInt converts it to a number. 
-    //setBpm(newBpm) updates the React > UI re-renders with new label. 
-    //setTempo(newBpm) updates the engine > audio timing changes. 
+  // e.target.value is the slider value. parseInt converts it to a number.
+  // setBpm(newBpm) updates the React > UI re-renders with new label.
+  // setTempo(newBpm) updates the engine > audio timing changes.
   const handleBpmChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newBpm = parseInt(e.target.value);
     setBpm(newBpm);
     metronomeRef.current.setTempo(newBpm);
   };
 
-    //e.target.value is the selected option value. parseInt converts it to a number.  
-    //setBeatsPerMeasure updates the React > dropdown stays selected on "3/4"
-    //setTimeSignature udpates engine > beat counter now cycles through 0, 1, 2, 3, 0, etc.
+  // e.target.value is the selected option value. parseInt converts it to a number.
+  // setBeatsPerMeasure updates the React > dropdown stays selected on "3/4"
+  // setTimeSignature updates engine > beat counter now cycles through 0, 1, 2, 3, 0, etc.
   const handleTimeSigChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newBeats = parseInt(e.target.value);
     setBeatsPerMeasure(newBeats);
     metronomeRef.current.setTimeSignature(newBeats);
-  
   };
 
   return (
