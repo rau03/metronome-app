@@ -33,7 +33,7 @@ export class MetronomeEngine {
     this.currentBeat = 0;
 
     // Use ! to tell TypeScript we know audioContext exists now
-    this.nextNoteTime = this.audioContext!.currentTime + 0.1;
+    this.nextNoteTime = this.audioContext!.currentTime;
 
     this.scheduler();
   }
