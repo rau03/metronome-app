@@ -1,42 +1,30 @@
 // src/MetronomeEngine.ts
 
 export class MetronomeEngine {
-  // 1. The AudioContext is the "container" for all sound.
-  // It's like the physical audio interface on a computer.
   private audioContext: AudioContext | null = null;
-
-  // 2. We need to track the state of the metronome
   private isPlaying: boolean = false;
   private tempo: number = 120;
   private currentBeat: number = 0;
   private beatsPerMeasure: number = 4;
 
-  // 3. SCHEDULING VARIABLES (The "Secret Sauce")
-  // Web Audio timing is precise, JavaScript 'setTimeout' is not.
-  // We use a 'lookahead' technique: checking frequently to schedule notes
-  // that are coming up soon.
-  private lookahead: number = 25.0; // How frequently to call the scheduler (in ms)
-  private scheduleAheadTime: number = 0.1; // How far ahead to schedule audio (in sec)
-  private nextNoteTime: number = 0.0; // When the next note is due
-  private timerID: number | undefined; // To store the setTimeout ID so we can stop it
+  private lookahead: number = 25.0; // ms
+  private scheduleAheadTime: number = 0.1; // sec
+  private nextNoteTime: number = 0.0;
+  private timerID: number | undefined;
 
   constructor(initialTempo: number = 120, beatsPerMeasure: number = 4) {
     this.tempo = initialTempo;
     this.beatsPerMeasure = beatsPerMeasure;
   }
 
-  // created AudioContext lazily (only when users clicks start)
-  //Resume if suspended
-  //proceed with starting the metronome
   public start() {
-    if (this.isPlaying) return; // Prevent multiple loops if clicked twice
+    if (this.isPlaying) return;
 
     if (this.audioContext == null) {
       this.audioContext = new (window.AudioContext ||
         (window as any).webkitAudioContext)();
     }
 
-    // Resume if suspended (browser requirement)
     if (this.audioContext.state === "suspended") {
       this.audioContext.resume();
     }
@@ -44,23 +32,20 @@ export class MetronomeEngine {
     this.isPlaying = true;
     this.currentBeat = 0;
 
-    // Schedule the first note slightly in the future (0.1s) to avoid "glitches"
-    // where the browser tries to play a sound in the past.
+    // Use ! to tell TypeScript we know audioContext exists now
     this.nextNoteTime = this.audioContext!.currentTime + 0.1;
 
     this.scheduler();
   }
-  //tells the rest of code "we are stopped"
-  //this actually is the stop the mechanism (clearTimeout)
+
   public stop() {
     this.isPlaying = false;
-
     if (this.timerID !== undefined) {
-      clearTimeout(this.timerID);
+      window.clearTimeout(this.timerID);
       this.timerID = undefined;
     }
   }
-  //update the tempo
+
   public setTempo(bpm: number) {
     this.tempo = bpm;
   }
@@ -70,24 +55,54 @@ export class MetronomeEngine {
     this.currentBeat = 0;
   }
 
-  // --- PRIVATE METHODS (The internal engine logic) ---
+  // --- PRIVATE METHODS ---
 
   private scheduler() {
-    // TODO:
-    // This is the recursive loop.
-    // While (nextNoteTime < currentTime + scheduleAheadTime) {
-    //    scheduleNote(...)
-    //    advanceNote(...)
-    // }
-    // setTimeout(() => this.scheduler(), this.lookahead)
+    if (this.audioContext == null) return;
+
+    while (
+      this.nextNoteTime <
+      this.audioContext.currentTime + this.scheduleAheadTime
+    ) {
+      this.scheduleNote(this.currentBeat, this.nextNoteTime);
+      this.nextNote();
+    }
+
+    if (this.isPlaying) {
+      this.timerID = window.setTimeout(() => this.scheduler(), this.lookahead);
+    }
   }
 
   private scheduleNote(beatNumber: number, time: number) {
-    // TODO: Create the Oscillator and make the beep sound
+    if (!this.audioContext) return;
+
+    // Create Oscillator and GainNode
+    const osc = this.audioContext.createOscillator();
+    const envelope = this.audioContext.createGain();
+
+    osc.connect(envelope);
+    envelope.connect(this.audioContext.destination);
+
+    if (beatNumber === 0) {
+      osc.frequency.value = 1000; // High pitch for beat 1
+    } else {
+      osc.frequency.value = 800; // Low pitch for others
+    }
+
+    osc.start(time);
+    osc.stop(time + 0.05);
+
+    envelope.gain.value = 1;
+    envelope.gain.exponentialRampToValueAtTime(0.001, time + 0.05);
   }
 
   private nextNote() {
-    // TODO: Calculate when the next note happens based on BPM
-    // increment the beat number (0, 1, 2, 3 -> 0)
+    const secondsPerBeat = 60.0 / this.tempo;
+    this.nextNoteTime += secondsPerBeat;
+
+    this.currentBeat++;
+    if (this.currentBeat === this.beatsPerMeasure) {
+      this.currentBeat = 0;
+    }
   }
 }
